@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
-            this.textBoxWikitext = new System.Windows.Forms.TextBox();
             this.labelName = new System.Windows.Forms.Label();
             this.labelAlternativeNames = new System.Windows.Forms.Label();
             this.labelShortDescription = new System.Windows.Forms.Label();
@@ -53,19 +52,17 @@
             this.labelTitle = new System.Windows.Forms.Label();
             this.textBoxTitle = new System.Windows.Forms.TextBox();
             this.buttonOpenInBrowser = new System.Windows.Forms.Button();
+            this.tabControlPage = new System.Windows.Forms.TabControl();
+            this.tabPageMarkup = new System.Windows.Forms.TabPage();
+            this.textBoxWikitext = new System.Windows.Forms.TextBox();
+            this.tabPageBrowser = new System.Windows.Forms.TabPage();
+            this.webBrowser = new System.Windows.Forms.WebBrowser();
+            this.labelWarnings = new System.Windows.Forms.Label();
             this.panelPersondata.SuspendLayout();
+            this.tabControlPage.SuspendLayout();
+            this.tabPageMarkup.SuspendLayout();
+            this.tabPageBrowser.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // textBoxWikitext
-            // 
-            this.textBoxWikitext.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.textBoxWikitext.Location = new System.Drawing.Point(0, 40);
-            this.textBoxWikitext.Multiline = true;
-            this.textBoxWikitext.Name = "textBoxWikitext";
-            this.textBoxWikitext.ReadOnly = true;
-            this.textBoxWikitext.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBoxWikitext.Size = new System.Drawing.Size(604, 544);
-            this.textBoxWikitext.TabIndex = 3;
             // 
             // labelName
             // 
@@ -188,6 +185,7 @@
             // 
             // panelPersondata
             // 
+            this.panelPersondata.Controls.Add(this.labelWarnings);
             this.panelPersondata.Controls.Add(this.buttonRemove);
             this.panelPersondata.Controls.Add(this.textBoxEditSummary);
             this.panelPersondata.Controls.Add(this.labelEditSummary);
@@ -287,17 +285,82 @@
             this.buttonOpenInBrowser.UseVisualStyleBackColor = true;
             this.buttonOpenInBrowser.Click += new System.EventHandler(this.buttonOpenInBrowser_Click);
             // 
+            // tabControlPage
+            // 
+            this.tabControlPage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.tabControlPage.Controls.Add(this.tabPageMarkup);
+            this.tabControlPage.Controls.Add(this.tabPageBrowser);
+            this.tabControlPage.Location = new System.Drawing.Point(2, 33);
+            this.tabControlPage.Name = "tabControlPage";
+            this.tabControlPage.SelectedIndex = 0;
+            this.tabControlPage.Size = new System.Drawing.Size(602, 551);
+            this.tabControlPage.TabIndex = 17;
+            this.tabControlPage.SelectedIndexChanged += new System.EventHandler(this.tabControlPage_SelectedIndexChanged);
+            // 
+            // tabPageMarkup
+            // 
+            this.tabPageMarkup.Controls.Add(this.textBoxWikitext);
+            this.tabPageMarkup.Location = new System.Drawing.Point(4, 22);
+            this.tabPageMarkup.Name = "tabPageMarkup";
+            this.tabPageMarkup.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageMarkup.Size = new System.Drawing.Size(594, 525);
+            this.tabPageMarkup.TabIndex = 0;
+            this.tabPageMarkup.Text = "Markup";
+            this.tabPageMarkup.UseVisualStyleBackColor = true;
+            // 
+            // textBoxWikitext
+            // 
+            this.textBoxWikitext.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxWikitext.Location = new System.Drawing.Point(3, 3);
+            this.textBoxWikitext.Multiline = true;
+            this.textBoxWikitext.Name = "textBoxWikitext";
+            this.textBoxWikitext.ReadOnly = true;
+            this.textBoxWikitext.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBoxWikitext.Size = new System.Drawing.Size(588, 519);
+            this.textBoxWikitext.TabIndex = 4;
+            // 
+            // tabPageBrowser
+            // 
+            this.tabPageBrowser.Controls.Add(this.webBrowser);
+            this.tabPageBrowser.Location = new System.Drawing.Point(4, 22);
+            this.tabPageBrowser.Name = "tabPageBrowser";
+            this.tabPageBrowser.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageBrowser.Size = new System.Drawing.Size(594, 525);
+            this.tabPageBrowser.TabIndex = 1;
+            this.tabPageBrowser.Text = "Preview";
+            this.tabPageBrowser.UseVisualStyleBackColor = true;
+            // 
+            // webBrowser
+            // 
+            this.webBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webBrowser.Location = new System.Drawing.Point(3, 3);
+            this.webBrowser.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser.Name = "webBrowser";
+            this.webBrowser.Size = new System.Drawing.Size(588, 519);
+            this.webBrowser.TabIndex = 17;
+            // 
+            // labelWarnings
+            // 
+            this.labelWarnings.AutoSize = true;
+            this.labelWarnings.ForeColor = System.Drawing.Color.Red;
+            this.labelWarnings.Location = new System.Drawing.Point(10, 252);
+            this.labelWarnings.Name = "labelWarnings";
+            this.labelWarnings.Size = new System.Drawing.Size(91, 13);
+            this.labelWarnings.TabIndex = 22;
+            this.labelWarnings.Text = "Warnings go here";
+            this.labelWarnings.Visible = false;
+            // 
             // FormMain
             // 
             this.AcceptButton = this.buttonSaveAndNext;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(998, 584);
+            this.Controls.Add(this.tabControlPage);
             this.Controls.Add(this.buttonOpenInBrowser);
             this.Controls.Add(this.textBoxTitle);
             this.Controls.Add(this.labelTitle);
             this.Controls.Add(this.panelPersondata);
-            this.Controls.Add(this.textBoxWikitext);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FormMain";
             this.Text = "Persondata-o-matic";
@@ -307,6 +370,10 @@
             this.Resize += new System.EventHandler(this.FormMain_Resize);
             this.panelPersondata.ResumeLayout(false);
             this.panelPersondata.PerformLayout();
+            this.tabControlPage.ResumeLayout(false);
+            this.tabPageMarkup.ResumeLayout(false);
+            this.tabPageMarkup.PerformLayout();
+            this.tabPageBrowser.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -314,7 +381,6 @@
 
         #endregion
 
-        private System.Windows.Forms.TextBox textBoxWikitext;
         private System.Windows.Forms.Label labelName;
         private System.Windows.Forms.Label labelAlternativeNames;
         private System.Windows.Forms.Label labelShortDescription;
@@ -338,6 +404,12 @@
         private System.Windows.Forms.TextBox textBoxTitle;
         private System.Windows.Forms.Button buttonRemove;
         private System.Windows.Forms.Button buttonOpenInBrowser;
+        private System.Windows.Forms.TabControl tabControlPage;
+        private System.Windows.Forms.TabPage tabPageMarkup;
+        private System.Windows.Forms.TextBox textBoxWikitext;
+        private System.Windows.Forms.TabPage tabPageBrowser;
+        private System.Windows.Forms.WebBrowser webBrowser;
+        private System.Windows.Forms.Label labelWarnings;
     }
 }
 

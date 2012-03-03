@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Web;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using DotNetWikiBot;
@@ -21,7 +22,8 @@ namespace Persondata_o_matic
         string currentTemplate;
         int currentTemplateIndex;
 
-        string category;
+        PageListSource pageListSource;
+        string pageListSourceValue;
         string origPageText;
         string origName = "", origAlternativeNames = "", origShortDescription = "", origDateOfBirth = "", origPlaceOfBirth = "", origDateOfDeath = "", origPlaceOfDeath = "";
         bool manualEditSummary;
@@ -32,8 +34,12 @@ namespace Persondata_o_matic
         int lastLoadedPageIndex = -1;
         int lastSavedPageIndex = -1;
         int numLoadAheadPages;
+        int numCategoryPagesToRetrieve;
+        bool randomizePageOrder;
         Queue<SaveInfo> saveQueue = new Queue<SaveInfo>();
 
+        // Misc. notifications
+        bool multiplePersondataTemplatesFound;
 
         private static string GetRegexForField(string field)
         {
@@ -111,30 +117,49 @@ namespace Persondata_o_matic
             }
 
             numLoadAheadPages = loginForm.MaxLoadAheadPages;
+            numCategoryPagesToRetrieve = loginForm.MaxCategoryPages;
+            randomizePageOrder = loginForm.RandomizeOrder;
             pageList = new PageList(site);
-            category = loginForm.Category;
+            pageListSource = loginForm.PageListSource;
+            pageListSourceValue = loginForm.PageListSourceValue;
 
-            loadingDialog.Message = "Loading list of pages (up to 10000)...";
+            loadingDialog.Message = "Loading list of pages (up to " + numCategoryPagesToRetrieve + ")...";
             Thread fillFromCategoryThread = new Thread(new ThreadStart(delegate()
             {
-                pageList.FillAllFromCategoryEx(category, 10000);
-                this.Invoke(new MethodInvoker(CompleteCategoryLoad));
+                switch (pageListSource)
+                {
+                    case PageListSource.category:
+                        pageList.FillAllFromCategoryEx(pageListSourceValue, numCategoryPagesToRetrieve);
+                        Invoke(new MethodInvoker(CompletePageListLoad));
+                        break;
+                    case PageListSource.file:
+                        pageList.FillFromFile(pageListSourceValue);
+                        Invoke(new MethodInvoker(CompletePageListLoad));
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+                //pageList.FillFromFile("pages.txt"); // just for debugging to load up some pages
+
             }));
             fillFromCategoryThread.Start();
         }
 
-        void CompleteCategoryLoad()
+        void CompletePageListLoad()
         {
             loadingDialog.Hide();
 
-            // Shuffle PageList in random order
-            Random r = new Random();
-            for (int i = pageList.Count() - 1; i >= 1; i--)
+            if (randomizePageOrder)
             {
-                int j = r.Next(0, i + 1);
-                Page temp = pageList[j];
-                pageList[j] = pageList[i];
-                pageList[i] = temp;
+                // Shuffle PageList in random order
+                Random r = new Random();
+                for (int i = pageList.Count() - 1; i >= 1; i--)
+                {
+                    int j = r.Next(0, i + 1);
+                    Page temp = pageList[j];
+                    pageList[j] = pageList[i];
+                    pageList[i] = temp;
+                }
             }
 
             loadAheadThread = new Thread(new ThreadStart(LoadAhead));
@@ -180,6 +205,7 @@ namespace Persondata_o_matic
         void ShowNextPage()
         {
             SetControlsEnabled(false);
+            webBrowser.Navigate("about:blank"); // clear the contents
 
             int nextPage = lastSavedPageIndex + 1;
             if (nextPage >= pageList.Count())
@@ -253,6 +279,11 @@ namespace Persondata_o_matic
             textBoxTitle.Text = page.title;
             textBoxWikitext.Text = currentPageText.Replace("\n", "\r\n");
 
+            if (tabControlPage.SelectedTab == tabPageBrowser)
+            {
+                NavigateWebBrowserToCurrentPage();
+            }
+
             Match templateMatch = regexTemplate.Match(currentPageText);
             currentTemplate = regexTemplate.Match(currentPageText).Value;
             currentTemplateIndex = templateMatch.Index;
@@ -280,7 +311,38 @@ namespace Persondata_o_matic
 
             UpdateEditSummary();
 
+            string warningText = "";
+
+            multiplePersondataTemplatesFound = false;
+            if (regexTemplate.Matches(currentPageText).Count > 1)
+            {
+                multiplePersondataTemplatesFound = true; // this may not need a separate variable, but we never know if we want to act upon this
+                warningText += "* Multiple {{persondata}} templates found!";
+            }
+
+            if (warningText != "")
+            {
+                labelWarnings.Text = "Warning:\n" + warningText;
+                labelWarnings.Show();
+            }
+            else
+            {
+                labelWarnings.Hide();
+            }
+
             UpdateFocus();
+        }
+
+        private void NavigateWebBrowserToCurrentPage()
+        {
+            // Don't try loading when no more pages left
+            if (pageList.Count() <= lastSavedPageIndex + 1)
+                return;
+
+            // Syntax: http://en.wikipedia.org/w/index.php?title=Elephant&action=render
+            string url = site.site + "/w/index.php?action=render&title=" + HttpUtility.UrlEncode(pageList[lastSavedPageIndex + 1].title);
+            if (webBrowser.Url == null || webBrowser.Url.ToString() != url)
+                webBrowser.Navigate(url);
         }
 
         private string GuessName(Page page)
@@ -307,11 +369,11 @@ namespace Persondata_o_matic
 
         private void UpdateFocus()
         {
-            if (category == "Persondata templates without name parameter")
+            if (pageListSourceValue == "Persondata templates without name parameter")
             {
                 textBoxName.Focus();
             }
-            else if (category == "Persondata templates without short description parameter")
+            else if (pageListSourceValue == "Persondata templates without short description parameter")
             {
                 textBoxShortDescription.Focus();
             }
@@ -431,7 +493,12 @@ namespace Persondata_o_matic
             }
             else
             {
-                textBoxEditSummary.Text = "persondata: " + string.Join(", ", list.ToArray()) + " using [[Wikipedia:Persondata-o-matic|Persondata-o-matic]]";
+                textBoxEditSummary.Text = "Persondata: " + string.Join(", ", list.ToArray()) + " using [[WP:POM|Persondata-o-matic]]";
+
+                if (textBoxEditSummary.Text.Length > 250)
+                {
+                    textBoxEditSummary.Text = "Modifying Persondata using [[WP:POM|Persondata-o-matic]]";
+                }
             }
             manualEditSummary = false;
         }
@@ -561,7 +628,7 @@ namespace Persondata_o_matic
                     pageList[lastSavedPageIndex].text = currentPageText;
                     SaveInfo info = new SaveInfo();
                     info.Page = pageList[lastSavedPageIndex];
-                    info.EditSummary = "Removing persondata (not a biographical article)";
+                    info.EditSummary = "Removing persondata (not a biographical article) using [[WP:POM|Persondata-o-matic]]";
                     lock (saveQueue)
                     {
                         saveQueue.Enqueue(info);
@@ -585,6 +652,14 @@ namespace Persondata_o_matic
             catch (Exception ex)
             {
                 MessageBox.Show("Error occurred starting default browser: " + ex.Message);
+            }
+        }
+
+        private void tabControlPage_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabControlPage.SelectedTab == tabPageBrowser)
+            {
+                NavigateWebBrowserToCurrentPage();
             }
         }
     }
