@@ -1,0 +1,14 @@
+Persondata-o-matic is a tool for Microsoft Windows for rapid interactive entry of
+persondata information in biographical entries on Wikipedia. For details see:
+
+http://en.wikipedia.org/wiki/Wikipedia:Persondata-o-matic
+
+It is written in C# using DotNetWikiBot (included in download) and requires the
+.NET Framework 2.0 or later (included on any Windows Vista or later PC), and also
+available from:
+
+http://www.microsoft.com/download/en/details.aspx?id=19
+
+All rights to Person-o-matic source code, binaries, and other materials are
+released under the Creative Commons Zero Waiver, except for DotNetWikiBot,
+which is released under the MIT (X11) license.
