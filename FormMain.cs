@@ -43,7 +43,10 @@ namespace Persondata_o_matic
 
         private static string GetRegexForField(string field)
         {
-            return @"\{\{\s*persondata[^\}]*\|\s*" + field + @"\s*=([ \t]*([^\}\|]*))";
+            //return @"\{\{\s*persondata[^\}]*\|\s*" + field + @"\s*=([ \t]*([^\}\|]*))";
+            //       make sure to look ahead for "|" or "}" since lookup is non-greedy and would otherwise halt immediatelly \
+            //                                                            | wikilink   |     | template   |                 \|/
+            return @"\{\{\s*persondata[^\}]*\|\s*" + field + @"\s*=((?:(?:\[\[[^\]]*\]\])*(?:\{\{[^\}]*\}\})*[^\|}]*?)*)(?=[\|\}])";
         }
         Regex regexTemplate = new Regex(@"\{\{\s*persondata[^\}]*\}\}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
         Regex regexName             = new Regex(GetRegexForField("NAME"),              RegexOptions.IgnoreCase | RegexOptions.Multiline);
@@ -287,19 +290,19 @@ namespace Persondata_o_matic
             Match templateMatch = regexTemplate.Match(currentPageText);
             currentTemplate = regexTemplate.Match(currentPageText).Value;
             currentTemplateIndex = templateMatch.Index;
-            textBoxName.Text = regexName.Match(currentTemplate).Groups[2].Value.Trim();
+            textBoxName.Text = regexName.Match(currentTemplate).Groups[1].Value.Trim();
             origName = textBoxName.Text;
-            textBoxAlternativeNames.Text = regexAlternativeNames.Match(currentTemplate).Groups[2].Value.Trim();
+            textBoxAlternativeNames.Text = regexAlternativeNames.Match(currentTemplate).Groups[1].Value.Trim();
             origAlternativeNames = textBoxAlternativeNames.Text;
-            textBoxShortDescription.Text = regexShortDescription.Match(currentTemplate).Groups[2].Value.Trim();
+            textBoxShortDescription.Text = regexShortDescription.Match(currentTemplate).Groups[1].Value.Trim();
             origShortDescription = textBoxShortDescription.Text;
-            textBoxDateOfBirth.Text = regexDateOfBirth.Match(currentTemplate).Groups[2].Value.Trim();
+            textBoxDateOfBirth.Text = regexDateOfBirth.Match(currentTemplate).Groups[1].Value.Trim();
             origDateOfBirth = textBoxDateOfBirth.Text;
-            textBoxPlaceOfBirth.Text = regexPlaceOfBirth.Match(currentTemplate).Groups[2].Value.Trim();
+            textBoxPlaceOfBirth.Text = regexPlaceOfBirth.Match(currentTemplate).Groups[1].Value.Trim();
             origPlaceOfBirth = textBoxPlaceOfBirth.Text;
-            textBoxDateOfDeath.Text = regexDateOfDeath.Match(currentTemplate).Groups[2].Value.Trim();
+            textBoxDateOfDeath.Text = regexDateOfDeath.Match(currentTemplate).Groups[1].Value.Trim();
             origDateOfDeath = textBoxDateOfDeath.Text;
-            textBoxPlaceOfDeath.Text = regexPlaceOfDeath.Match(currentTemplate).Groups[2].Value.Trim();
+            textBoxPlaceOfDeath.Text = regexPlaceOfDeath.Match(currentTemplate).Groups[1].Value.Trim();
             origPlaceOfDeath = textBoxPlaceOfDeath.Text;
 
             if (textBoxName.Text == "")
@@ -369,14 +372,16 @@ namespace Persondata_o_matic
 
         private void UpdateFocus()
         {
-            if (pageListSourceValue == "Persondata templates without name parameter")
-            {
-                textBoxName.Focus();
-            }
-            else if (pageListSourceValue == "Persondata templates without short description parameter")
-            {
-                textBoxShortDescription.Focus();
-            }
+            textBoxName.Focus();
+
+            //if (pageListSourceValue == "Persondata templates without name parameter")
+            //{
+            //    textBoxName.Focus();
+            //}
+            //else if (pageListSourceValue == "Persondata templates without short description parameter")
+            //{
+            //    textBoxShortDescription.Focus();
+            //}
         }
 
         void LoadAhead()
