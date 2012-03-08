@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{3497B98F-DE46-46D1-B7B5-2A6B5F57B1B6}</ProjectGuid>
+    <ProjectGuid>{80426153-E036-404A-9D6D-C52AC57B5F68}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Persondata_o_matic</RootNamespace>

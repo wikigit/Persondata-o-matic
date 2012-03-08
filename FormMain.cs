@@ -36,6 +36,7 @@ namespace Persondata_o_matic
         int numLoadAheadPages;
         int numCategoryPagesToRetrieve;
         bool randomizePageOrder;
+        bool loadPageListOnDemand;
         Queue<SaveInfo> saveQueue = new Queue<SaveInfo>();
 
         // Misc. notifications
@@ -108,6 +109,7 @@ namespace Persondata_o_matic
         FormLogin loginForm;
         string errorMessage;
         LoadingDialog loadingDialog;
+        string pageListNext = ""; // Used when loadPageListOnDemand == true to stream page list
 
         void CompleteLogin()
         {
@@ -122,17 +124,33 @@ namespace Persondata_o_matic
             numLoadAheadPages = loginForm.MaxLoadAheadPages;
             numCategoryPagesToRetrieve = loginForm.MaxCategoryPages;
             randomizePageOrder = loginForm.RandomizeOrder;
+            loadPageListOnDemand = !randomizePageOrder;
             pageList = new PageList(site);
             pageListSource = loginForm.PageListSource;
             pageListSourceValue = loginForm.PageListSourceValue;
 
-            loadingDialog.Message = "Loading list of pages (up to " + numCategoryPagesToRetrieve + ")...";
+            if (loadPageListOnDemand)
+            {
+                // Actually just loading some of the list of pages, more will be loaded on-demand later
+                loadingDialog.Message = "Loading list of pages...";
+            }
+            else
+            {
+                loadingDialog.Message = "Loading list of pages (up to " + numCategoryPagesToRetrieve + ")...";
+            }
             Thread fillFromCategoryThread = new Thread(new ThreadStart(delegate()
             {
                 switch (pageListSource)
                 {
                     case PageListSource.category:
-                        pageList.FillAllFromCategoryEx(pageListSourceValue, numCategoryPagesToRetrieve);
+                        if (loadPageListOnDemand)
+                        {
+                            pageList.FillSomeFromCategoryEx(pageListSourceValue, ref pageListNext);
+                        }
+                        else
+                        {
+                            pageList.FillAllFromCategoryEx(pageListSourceValue, numCategoryPagesToRetrieve);
+                        }
                         Invoke(new MethodInvoker(CompletePageListLoad));
                         break;
                     case PageListSource.file:
@@ -154,15 +172,8 @@ namespace Persondata_o_matic
 
             if (randomizePageOrder)
             {
-                // Shuffle PageList in random order
                 Random r = new Random();
-                for (int i = pageList.Count() - 1; i >= 1; i--)
-                {
-                    int j = r.Next(0, i + 1);
-                    Page temp = pageList[j];
-                    pageList[j] = pageList[i];
-                    pageList[i] = temp;
-                }
+                ShufflePageList(r, pageList);
             }
 
             loadAheadThread = new Thread(new ThreadStart(LoadAhead));
@@ -170,6 +181,17 @@ namespace Persondata_o_matic
             savePendingThread = new Thread(new ThreadStart(SavePending));
             savePendingThread.Start();
             ShowNextPage();
+        }
+
+        private static void ShufflePageList(Random r, PageList list)
+        {
+            for (int i = list.Count() - 1; i >= 1; i--)
+            {
+                int j = r.Next(0, i + 1);
+                Page temp = list[j];
+                list[j] = list[i];
+                list[i] = temp;
+            }
         }
 
         void SavePending()
@@ -386,7 +408,8 @@ namespace Persondata_o_matic
 
         void LoadAhead()
         {
-            while(true)
+            bool pageListDone = false;
+            while (true)
             {
                 bool shouldLoadNext;
                 lock (lastLoadedPageIndexLock)
@@ -396,6 +419,12 @@ namespace Persondata_o_matic
                 if (shouldLoadNext)
                 {
                     int nextPage = lastLoadedPageIndex + 1;
+                    if (!pageListDone && nextPage >= pageList.Count() - numLoadAheadPages && loadPageListOnDemand)
+                    {
+                        int prevCount = pageList.Count();
+                        pageList.FillSomeFromCategoryEx(pageListSourceValue, ref pageListNext);
+                        pageListDone = (pageList.Count() == prevCount);
+                    }
                     if (nextPage >= pageList.Count())
                     {
                         break;

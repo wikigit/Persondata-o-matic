@@ -3128,10 +3128,11 @@ namespace DotNetWikiBot
 				throw new ArgumentOutOfRangeException("quantity",
 					Bot.Msg("Quantity must be positive."));
 			if (Bot.useBotQuery == true && site.botQuery == true) {
+                string next = "";
 				FillFromCustomBotQueryList("allpages", "apnamespace=" + neededNSpace +
 				(acceptRedirects ? "" : "&apfilterredir=nonredirects") +
 				(string.IsNullOrEmpty(firstPageTitle) ? "" : "&apfrom=" +
-				HttpUtility.UrlEncode(firstPageTitle)), quantity);
+				HttpUtility.UrlEncode(firstPageTitle)), quantity, ref next);
 				return;
 			}
 			Console.WriteLine(
@@ -3268,6 +3269,8 @@ namespace DotNetWikiBot
 				matches.Count, logType);
 		}
 
+        const int MaxFillFromCustomBotQueryList = 500;
+
 		/// <summary>Gets page titles for this PageList from specified list, produced by
 		/// bot query interface ("api.php" MediaWiki extension). The function
 		/// does not clear the existing PageList, so new titles will be added.</summary>
@@ -3286,7 +3289,7 @@ namespace DotNetWikiBot
 		/// 	"cmcategory=Physical%20sciences&amp;cmnamespace=0|14",
 		/// 	int.MaxValue);
 		/// </code></example>
-		public void FillFromCustomBotQueryList(string listType, string queryParams, int quantity)
+		public void FillFromCustomBotQueryList(string listType, string queryParams, int quantity, ref string next)
 		{
 			if (!site.botQuery)
 				throw new WikiBotException(
@@ -3305,8 +3308,8 @@ namespace DotNetWikiBot
 			string attrTag = (listType != "allusers") ? "title" : "name";
 			string queryUri = site.indexPath + "api.php?action=query&list=" + listType +
 				"&format=xml&" + prefix + "limit=" +
-				((quantity > 500) ? "500" : quantity.ToString());
-			string src = "", next = "", queryFullUri = "";
+                ((quantity > MaxFillFromCustomBotQueryList) ? MaxFillFromCustomBotQueryList.ToString() : quantity.ToString());
+			string src = "", queryFullUri = "";
 			int count = pages.Count;
 			if (quantity != int.MaxValue)
 				quantity += pages.Count;
@@ -3465,14 +3468,15 @@ namespace DotNetWikiBot
 			categoryName = categoryName.Trim("[]\f\n\r\t\v ".ToCharArray());
 			categoryName = site.RemoveNSPrefix(categoryName, 14);
 			if (site.botQueryVersions.ContainsKey("ApiQueryCategoryMembers.php")) {
+                string next = "";
 				if (int.Parse(
 					site.botQueryVersions["ApiQueryCategoryMembers.php"].ToString()) >= 30533)
 						FillFromCustomBotQueryList("categorymembers", "cmtitle=" + 
 							HttpUtility.UrlEncode(site.namespaces["14"].ToString() + ":" +
-                            categoryName), quantity);
+                            categoryName), quantity, ref next);
 				else
 					FillFromCustomBotQueryList("categorymembers", "cmcategory=" +  
-						HttpUtility.UrlEncode(categoryName), quantity);
+						HttpUtility.UrlEncode(categoryName), quantity, ref next);
 			}
 			else if (site.botQueryVersions.ContainsKey("query.php"))
 				FillAllFromCategoryExOld(categoryName);
@@ -3483,6 +3487,29 @@ namespace DotNetWikiBot
 				FillAllFromCategory(categoryName);
 			}
 		}
+
+        public void FillSomeFromCategoryEx(string categoryName, ref string next)
+        {
+            if (string.IsNullOrEmpty(categoryName))
+                throw new ArgumentNullException("categoryName");
+            categoryName = categoryName.Trim("[]\f\n\r\t\v ".ToCharArray());
+            categoryName = site.RemoveNSPrefix(categoryName, 14);
+            if (site.botQueryVersions.ContainsKey("ApiQueryCategoryMembers.php"))
+            {
+                if (int.Parse(
+                    site.botQueryVersions["ApiQueryCategoryMembers.php"].ToString()) >= 30533)
+                    FillFromCustomBotQueryList("categorymembers", "cmtitle=" +
+                        HttpUtility.UrlEncode(site.namespaces["14"].ToString() + ":" +
+                        categoryName), MaxFillFromCustomBotQueryList, ref next);
+                else
+                    FillFromCustomBotQueryList("categorymembers", "cmcategory=" +
+                        HttpUtility.UrlEncode(categoryName), MaxFillFromCustomBotQueryList, ref next);
+            }
+            else
+            {
+                throw new WikiBotException("FillSomeFromCategoryEx only supported on sites with active Mediawiki API");
+            }
+        }
 
 		/// <summary>This internal function is kept for backwards compatibility only.
 		/// It gets all pages and subcategories in specified category using old obsolete 

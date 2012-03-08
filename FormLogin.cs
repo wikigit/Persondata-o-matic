@@ -140,5 +140,46 @@ namespace Persondata_o_matic
                 return PageListSource.file;
             throw new ArgumentOutOfRangeException("str");
         }
+
+        private void radioButtonFile_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButtonFile.Checked)
+            {
+                // Since lists are usually private to an individual, it makes sense to retrieve pages
+                // in order, rather than in random order.
+                checkBoxRandomOrder.Checked = false;
+            }
+        }
+
+        private void radioButtonCategory_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButtonCategory.Checked)
+            {
+                // To avoid edit conflicts when working off the categories, it's best to retrieve many articles
+                // and process them in random order.
+                numericUpDownMaximumCategoryPages.Value = 10000;
+                checkBoxRandomOrder.Checked = true;
+            }
+        }
+
+        private void buttonBrowseSource_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+            dialog.FilterIndex = 1;
+            dialog.RestoreDirectory = true;
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                textBoxPageListSourceFileName.Text = dialog.FileName;
+                radioButtonFile.Checked = true;
+            }
+        }
+
+        private void checkBoxRandomOrder_CheckedChanged(object sender, EventArgs e)
+        {
+            // If we're not retrieving in random order, we can retrieve pages on-demand, so
+            // there's no need to specify number of pages to retrieve.
+            numericUpDownMaximumCategoryPages.Enabled = checkBoxRandomOrder.Checked;
+        }
     }
 }
