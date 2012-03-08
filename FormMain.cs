@@ -39,12 +39,8 @@ namespace Persondata_o_matic
         bool loadPageListOnDemand;
         Queue<SaveInfo> saveQueue = new Queue<SaveInfo>();
 
-        // Misc. notifications
-        bool multiplePersondataTemplatesFound;
-
         private static string GetRegexForField(string field)
         {
-            //return @"\{\{\s*persondata[^\}]*\|\s*" + field + @"\s*=([ \t]*([^\}\|]*))";
             //       make sure to look ahead for "|" or "}" since lookup is non-greedy and would otherwise halt immediatelly \
             //                                                            | wikilink   |     | template   |                 \|/
             return @"\{\{\s*persondata[^\}]*\|\s*" + field + @"\s*=((?:(?:\[\[[^\]]*\]\])*(?:\{\{[^\}]*\}\})*[^\|}]*?)*)(?=[\|\}])";
@@ -338,10 +334,8 @@ namespace Persondata_o_matic
 
             string warningText = "";
 
-            multiplePersondataTemplatesFound = false;
             if (regexTemplate.Matches(currentPageText).Count > 1)
             {
-                multiplePersondataTemplatesFound = true; // this may not need a separate variable, but we never know if we want to act upon this
                 warningText += "* Multiple {{persondata}} templates found!";
             }
 
@@ -394,16 +388,18 @@ namespace Persondata_o_matic
 
         private void UpdateFocus()
         {
-            textBoxName.Focus();
-
-            //if (pageListSourceValue == "Persondata templates without name parameter")
-            //{
-            //    textBoxName.Focus();
-            //}
-            //else if (pageListSourceValue == "Persondata templates without short description parameter")
-            //{
-            //    textBoxShortDescription.Focus();
-            //}
+            if (pageListSourceValue == "Persondata templates without name parameter")
+            {
+                textBoxName.Focus();
+            }
+            else if (pageListSourceValue == "Persondata templates without short description parameter")
+            {
+                textBoxShortDescription.Focus();
+            }
+            else
+            {
+                textBoxName.Focus();
+            }
         }
 
         void LoadAhead()
@@ -487,7 +483,9 @@ namespace Persondata_o_matic
             Application.Exit();
         }
 
-        private string UpdateEditSummaryHelper(string name, string origValue, string value)
+        private delegate string UpdateEditSummaryHelper(string name, string origValue, string value);
+
+        private string UpdateEditSummaryHelperLong(string name, string origValue, string value)
         {
             if (origValue.Trim() == "" && value.Trim() != "")
             {
@@ -504,6 +502,35 @@ namespace Persondata_o_matic
             return "";
         }
 
+        private string UpdateEditSummaryHelperShort(string name, string origValue, string value)
+        {
+            if (origValue.Trim() == "" && value.Trim() != "")
+            {
+                return "added " + name;
+            }
+            else if (origValue.Trim() != "" && value.Trim() == "")
+            {
+                return "removed " + name;
+            }
+            else if (origValue.Trim() != value.Trim() && origValue.Trim() != "" && value.Trim() != "")
+            {
+                return "updated " + name;
+            }
+            return "";
+        }
+
+        private void CreateSummaryList(UpdateEditSummaryHelper helper, List<string> list)
+        {
+            list.Add(helper("name", origName, textBoxName.Text));
+            list.Add(helper("alternative names", origAlternativeNames, textBoxAlternativeNames.Text));
+            list.Add(helper("short description", origShortDescription, textBoxShortDescription.Text));
+            list.Add(helper("date of birth", origDateOfBirth, textBoxDateOfBirth.Text));
+            list.Add(helper("place of birth", origPlaceOfBirth, textBoxPlaceOfBirth.Text));
+            list.Add(helper("date of death", origDateOfDeath, textBoxDateOfDeath.Text));
+            list.Add(helper("place of death", origPlaceOfDeath, textBoxPlaceOfDeath.Text));
+            list.RemoveAll(delegate(string s) { return s.Length == 0; });
+        }
+
         private void UpdateEditSummary()
         {
             if (manualEditSummary)
@@ -511,23 +538,23 @@ namespace Persondata_o_matic
                 return;
             }
 
-            List<string> list = new List<string>();
-            list.Add(UpdateEditSummaryHelper("name", origName, textBoxName.Text));
-            list.Add(UpdateEditSummaryHelper("alternative names", origAlternativeNames, textBoxAlternativeNames.Text));
-            list.Add(UpdateEditSummaryHelper("short description", origShortDescription, textBoxShortDescription.Text));
-            list.Add(UpdateEditSummaryHelper("date of birth", origDateOfBirth, textBoxDateOfBirth.Text));
-            list.Add(UpdateEditSummaryHelper("place of birth", origPlaceOfBirth, textBoxPlaceOfBirth.Text));
-            list.Add(UpdateEditSummaryHelper("date of death", origDateOfDeath, textBoxDateOfDeath.Text));
-            list.Add(UpdateEditSummaryHelper("place of death", origPlaceOfDeath, textBoxPlaceOfDeath.Text));
-            list.RemoveAll(delegate(string s) { return s.Length == 0; });
+            List<string> listLong = new List<string>();
+            List<string> listShort = new List<string>();
+            CreateSummaryList(UpdateEditSummaryHelperLong, listLong);
+            CreateSummaryList(UpdateEditSummaryHelperShort, listShort);
 
-            if (list.Count == 0)
+            if (listLong.Count == 0)
             {
                 textBoxEditSummary.Text = "";
             }
             else
             {
-                textBoxEditSummary.Text = "Persondata: " + string.Join(", ", list.ToArray()) + " using [[WP:POM|Persondata-o-matic]]";
+                textBoxEditSummary.Text = "Persondata: " + string.Join(", ", listLong.ToArray()) + " using [[WP:POM|Persondata-o-matic]]";
+
+                if (textBoxEditSummary.Text.Length > 250)
+                {
+                    textBoxEditSummary.Text = "Persondata: " + string.Join(", ", listShort.ToArray()) + " using [[WP:POM|Persondata-o-matic]]";
+                }
 
                 if (textBoxEditSummary.Text.Length > 250)
                 {
