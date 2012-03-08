@@ -388,13 +388,20 @@ namespace Persondata_o_matic
 
         private void UpdateFocus()
         {
-            if (pageListSourceValue == "Persondata templates without name parameter")
+            if (pageListSource == PageListSource.category)
             {
-                textBoxName.Focus();
-            }
-            else if (pageListSourceValue == "Persondata templates without short description parameter")
-            {
-                textBoxShortDescription.Focus();
+                if (pageListSourceValue == "Category:Persondata templates without name parameter")
+                {
+                    textBoxName.Focus();
+                }
+                else if (pageListSourceValue == "Category:Persondata templates without short description parameter")
+                {
+                    textBoxShortDescription.Focus();
+                }
+                else
+                {
+                    textBoxName.Focus();
+                }
             }
             else
             {
