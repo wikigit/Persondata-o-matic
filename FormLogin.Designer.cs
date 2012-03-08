@@ -44,6 +44,7 @@
             this.textBoxPageListSourceFileName = new System.Windows.Forms.TextBox();
             this.radioButtonCategory = new System.Windows.Forms.RadioButton();
             this.radioButtonFile = new System.Windows.Forms.RadioButton();
+            this.buttonBrowseSource = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownMaximumLoadAheadPages)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownMaximumCategoryPages)).BeginInit();
             this.SuspendLayout();
@@ -86,7 +87,7 @@
             this.buttonLogin.Location = new System.Drawing.Point(237, 184);
             this.buttonLogin.Name = "buttonLogin";
             this.buttonLogin.Size = new System.Drawing.Size(75, 23);
-            this.buttonLogin.TabIndex = 8;
+            this.buttonLogin.TabIndex = 15;
             this.buttonLogin.Text = "&Log in";
             this.buttonLogin.UseVisualStyleBackColor = true;
             this.buttonLogin.Click += new System.EventHandler(this.buttonLogin_Click);
@@ -106,7 +107,7 @@
             this.labelMaxLoadAhead.Location = new System.Drawing.Point(14, 148);
             this.labelMaxLoadAhead.Name = "labelMaxLoadAhead";
             this.labelMaxLoadAhead.Size = new System.Drawing.Size(142, 13);
-            this.labelMaxLoadAhead.TabIndex = 6;
+            this.labelMaxLoadAhead.TabIndex = 13;
             this.labelMaxLoadAhead.Text = "&Maximum load-ahead pages:";
             // 
             // numericUpDownMaximumLoadAheadPages
@@ -124,7 +125,7 @@
             0});
             this.numericUpDownMaximumLoadAheadPages.Name = "numericUpDownMaximumLoadAheadPages";
             this.numericUpDownMaximumLoadAheadPages.Size = new System.Drawing.Size(120, 20);
-            this.numericUpDownMaximumLoadAheadPages.TabIndex = 7;
+            this.numericUpDownMaximumLoadAheadPages.TabIndex = 14;
             this.numericUpDownMaximumLoadAheadPages.Value = new decimal(new int[] {
             5,
             0,
@@ -137,7 +138,7 @@
             this.labelMaxCategoryPages.Location = new System.Drawing.Point(14, 122);
             this.labelMaxCategoryPages.Name = "labelMaxCategoryPages";
             this.labelMaxCategoryPages.Size = new System.Drawing.Size(136, 13);
-            this.labelMaxCategoryPages.TabIndex = 6;
+            this.labelMaxCategoryPages.TabIndex = 10;
             this.labelMaxCategoryPages.Text = "M&aximum pages to retrieve:";
             // 
             // numericUpDownMaximumCategoryPages
@@ -160,9 +161,9 @@
             0});
             this.numericUpDownMaximumCategoryPages.Name = "numericUpDownMaximumCategoryPages";
             this.numericUpDownMaximumCategoryPages.Size = new System.Drawing.Size(120, 20);
-            this.numericUpDownMaximumCategoryPages.TabIndex = 7;
+            this.numericUpDownMaximumCategoryPages.TabIndex = 11;
             this.numericUpDownMaximumCategoryPages.Value = new decimal(new int[] {
-            100,
+            10000,
             0,
             0,
             0});
@@ -175,9 +176,10 @@
             this.checkBoxRandomOrder.Location = new System.Drawing.Point(304, 123);
             this.checkBoxRandomOrder.Name = "checkBoxRandomOrder";
             this.checkBoxRandomOrder.Size = new System.Drawing.Size(106, 17);
-            this.checkBoxRandomOrder.TabIndex = 9;
+            this.checkBoxRandomOrder.TabIndex = 12;
             this.checkBoxRandomOrder.Text = "Randomize order";
             this.checkBoxRandomOrder.UseVisualStyleBackColor = true;
+            this.checkBoxRandomOrder.CheckedChanged += new System.EventHandler(this.checkBoxRandomOrder_CheckedChanged);
             // 
             // comboBoxPageListSourceCategory
             // 
@@ -188,16 +190,15 @@
             this.comboBoxPageListSourceCategory.Location = new System.Drawing.Point(182, 71);
             this.comboBoxPageListSourceCategory.Name = "comboBoxPageListSourceCategory";
             this.comboBoxPageListSourceCategory.Size = new System.Drawing.Size(342, 21);
-            this.comboBoxPageListSourceCategory.TabIndex = 10;
-            this.comboBoxPageListSourceCategory.Text = "Category:Persondata templates without short description parameter";
+            this.comboBoxPageListSourceCategory.TabIndex = 6;
+            this.comboBoxPageListSourceCategory.Text = "Category:Persondata templates without name parameter";
             // 
             // textBoxPageListSourceFileName
             // 
             this.textBoxPageListSourceFileName.Location = new System.Drawing.Point(183, 94);
             this.textBoxPageListSourceFileName.Name = "textBoxPageListSourceFileName";
-            this.textBoxPageListSourceFileName.Size = new System.Drawing.Size(342, 20);
-            this.textBoxPageListSourceFileName.TabIndex = 12;
-            this.textBoxPageListSourceFileName.Text = "pages.txt";
+            this.textBoxPageListSourceFileName.Size = new System.Drawing.Size(251, 20);
+            this.textBoxPageListSourceFileName.TabIndex = 8;
             // 
             // radioButtonCategory
             // 
@@ -206,10 +207,11 @@
             this.radioButtonCategory.Location = new System.Drawing.Point(106, 72);
             this.radioButtonCategory.Name = "radioButtonCategory";
             this.radioButtonCategory.Size = new System.Drawing.Size(70, 17);
-            this.radioButtonCategory.TabIndex = 13;
+            this.radioButtonCategory.TabIndex = 5;
             this.radioButtonCategory.TabStop = true;
             this.radioButtonCategory.Text = "Category:";
             this.radioButtonCategory.UseVisualStyleBackColor = true;
+            this.radioButtonCategory.CheckedChanged += new System.EventHandler(this.radioButtonCategory_CheckedChanged);
             // 
             // radioButtonFile
             // 
@@ -217,9 +219,20 @@
             this.radioButtonFile.Location = new System.Drawing.Point(106, 95);
             this.radioButtonFile.Name = "radioButtonFile";
             this.radioButtonFile.Size = new System.Drawing.Size(65, 17);
-            this.radioButtonFile.TabIndex = 14;
+            this.radioButtonFile.TabIndex = 7;
             this.radioButtonFile.Text = "Text file:";
             this.radioButtonFile.UseVisualStyleBackColor = true;
+            this.radioButtonFile.CheckedChanged += new System.EventHandler(this.radioButtonFile_CheckedChanged);
+            // 
+            // buttonBrowseSource
+            // 
+            this.buttonBrowseSource.Location = new System.Drawing.Point(441, 94);
+            this.buttonBrowseSource.Name = "buttonBrowseSource";
+            this.buttonBrowseSource.Size = new System.Drawing.Size(75, 23);
+            this.buttonBrowseSource.TabIndex = 9;
+            this.buttonBrowseSource.Text = "&Browse...";
+            this.buttonBrowseSource.UseVisualStyleBackColor = true;
+            this.buttonBrowseSource.Click += new System.EventHandler(this.buttonBrowseSource_Click);
             // 
             // FormLogin
             // 
@@ -227,6 +240,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(537, 219);
+            this.Controls.Add(this.buttonBrowseSource);
             this.Controls.Add(this.radioButtonFile);
             this.Controls.Add(this.radioButtonCategory);
             this.Controls.Add(this.textBoxPageListSourceFileName);
@@ -242,6 +256,7 @@
             this.Controls.Add(this.textBoxPassword);
             this.Controls.Add(this.labelUsername);
             this.Controls.Add(this.textBoxUsername);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FormLogin";
             this.Text = "Log in";
@@ -269,5 +284,6 @@
         private System.Windows.Forms.TextBox textBoxPageListSourceFileName;
         private System.Windows.Forms.RadioButton radioButtonCategory;
         private System.Windows.Forms.RadioButton radioButtonFile;
+        private System.Windows.Forms.Button buttonBrowseSource;
     }
 }
