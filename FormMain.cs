@@ -49,14 +49,14 @@ namespace Persondata_o_matic
             return @"\{\{\s*persondata[^\}]*\|\s*" + field + @"\s*=((?:(?:\[\[[^\]]*\]\])*(?:\{\{[^\}]*\}\})*[^\|}]*?)*)(?=[\|\}])";
         }
         Regex regexTemplate = new Regex(@"\{\{\s*persondata[^\}]*\}\}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        Regex regexName             = new Regex(GetRegexForField("NAME"),              RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        Regex regexAlternativeNames = new Regex(GetRegexForField("ALTERNATIVE NAMES"), RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        Regex regexShortDescription = new Regex(GetRegexForField("SHORT DESCRIPTION"), RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        Regex regexDateOfBirth      = new Regex(GetRegexForField("DATE OF BIRTH"),     RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        Regex regexPlaceOfBirth     = new Regex(GetRegexForField("PLACE OF BIRTH"),    RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        Regex regexDateOfDeath      = new Regex(GetRegexForField("DATE OF DEATH"),     RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        Regex regexPlaceOfDeath     = new Regex(GetRegexForField("PLACE OF DEATH"),    RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        Regex regexSortKey = new Regex(@"\[\[\s*Category\s*:\s*[^\|\]]*\|\s*([^\]]*)", RegexOptions.IgnoreCase);
+        Regex regexName             = new Regex(GetRegexForField("NAME"),              RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        Regex regexAlternativeNames = new Regex(GetRegexForField("ALTERNATIVE NAMES"), RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        Regex regexShortDescription = new Regex(GetRegexForField("SHORT DESCRIPTION"), RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        Regex regexDateOfBirth      = new Regex(GetRegexForField("DATE OF BIRTH"),     RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        Regex regexPlaceOfBirth     = new Regex(GetRegexForField("PLACE OF BIRTH"),    RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        Regex regexDateOfDeath      = new Regex(GetRegexForField("DATE OF DEATH"),     RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        Regex regexPlaceOfDeath     = new Regex(GetRegexForField("PLACE OF DEATH"),    RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        Regex regexSortKey = new Regex(@"\[\[\s*Category\s*:\s*[^\|\]]*\|\s*([^\]]*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public FormMain()
         {
