@@ -434,7 +434,7 @@ namespace Persondata_o_matic
             // > 3 -- 3 data points: year, month, day
             // > 4 -- could not parse the value, so shouldn't mess with this
             // This implies if we discover day, month, year, but the current value is just year, we can update it
-            // Real example: http://en.wikipedia.org/w/index.php?title=Fuad_Abdurahmanov&diff=prev&oldid=480996103
+            // Real example: http://en.wikipedia.org/w/index.php?title=Fuad_Abdurahmanov&diff=480997918&oldid=480997834
             int currentComplexity = 0;
 
             string currentValueTrimmed = currentValue.Trim();
@@ -504,9 +504,9 @@ namespace Persondata_o_matic
                         if (match.Success)
                         {
                             if (match.Groups[4].Value == "m")
-                                return match.Groups[1] + " " + MonthName(int.Parse(match.Groups[2].Value)) + " " + match.Groups[3];
+                                return match.Groups[3] + " " + MonthName(int.Parse(match.Groups[2].Value)) + " " + match.Groups[1];
                             else
-                                return MonthName(int.Parse(match.Groups[2].Value)) + " " + match.Groups[1] + ", " + match.Groups[3];
+                                return MonthName(int.Parse(match.Groups[2].Value)) + " " + match.Groups[3] + ", " + match.Groups[1];
                         }
                     }
 
