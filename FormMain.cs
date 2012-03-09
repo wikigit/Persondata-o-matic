@@ -41,18 +41,23 @@ namespace Persondata_o_matic
 
         private static string GetRegexForField(string field)
         {
-            //       make sure to look ahead for "|" or "}" since lookup is non-greedy and would otherwise halt immediatelly \
-            //                                                            | wikilink   |     | template   |                 \|/
-            return @"\{\{\s*persondata[^\}]*\|\s*" + field + @"\s*=((?:(?:\[\[[^\]]*\]\])*(?:\{\{[^\}]*\}\})*[^\|}]*?)*)(?=[\|\}])";
+            //   make sure to look ahead for "|" or "}" since lookup is non-greedy and would otherwise halt immediatelly
+            //                          | wikilink   |     | template   |                 \|/
+            return field + @"\s*=((?:(?:\[\[[^\]]*\]\])*(?:\{\{[^\}]*\}\})*[^\|}]*?)*)(?=[\|\}])";
         }
-        Regex regexTemplate = new Regex(@"\{\{\s*persondata[^\}]*\}\}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        Regex regexName             = new Regex(GetRegexForField("NAME"),              RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
-        Regex regexAlternativeNames = new Regex(GetRegexForField("ALTERNATIVE NAMES"), RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
-        Regex regexShortDescription = new Regex(GetRegexForField("SHORT DESCRIPTION"), RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
-        Regex regexDateOfBirth      = new Regex(GetRegexForField("DATE OF BIRTH"),     RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
-        Regex regexPlaceOfBirth     = new Regex(GetRegexForField("PLACE OF BIRTH"),    RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
-        Regex regexDateOfDeath      = new Regex(GetRegexForField("DATE OF DEATH"),     RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
-        Regex regexPlaceOfDeath     = new Regex(GetRegexForField("PLACE OF DEATH"),    RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        Regex regexPersondataTemplate = new Regex(@"\{\{\s*persondata(?:(?:\{\{[^\}]*\}\})*[^}]*?)*\}\}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        Regex regexName                  = new Regex(GetRegexForField("NAME"),              RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        Regex regexAlternativeNames      = new Regex(GetRegexForField("ALTERNATIVE NAMES"), RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        Regex regexShortDescription      = new Regex(GetRegexForField("SHORT DESCRIPTION"), RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        Regex regexPersondataDateOfBirth = new Regex(GetRegexForField("DATE OF BIRTH"),     RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        Regex regexPlaceOfBirth          = new Regex(GetRegexForField("PLACE OF BIRTH"),    RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        Regex regexDateOfDeath           = new Regex(GetRegexForField("DATE OF DEATH"),     RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        Regex regexPlaceOfDeath          = new Regex(GetRegexForField("PLACE OF DEATH"),    RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+
+        Regex regexInfoboxTemplate = new Regex(@"\{\{\s*[a-zA-Z0-9 ]*infobox(?:(?:\{\{[^\}]*\}\})*[^}]*?)*\}\}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        Regex regexInfoboxDateOfBirth = new Regex(GetRegexForField("birth_date"), RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        Regex regexInfoboxDateOfDeath = new Regex(GetRegexForField("death_date"), RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+
         Regex regexSortKey = new Regex(@"\[\[\s*Category\s*:\s*[^\|\]]*\|\s*([^\]]*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public FormMain()
@@ -294,39 +299,55 @@ namespace Persondata_o_matic
 
         private void UpdateControlsFromPage(Page page)
         {
+            textBoxWikitextOriginal.Text = Regex.Replace(page.text, @"(?!=\r)\n", "\r\n");
             // Removing comment per consensus at [[Wikipedia_talk:Persondata#Can_we_stop_adding_the_annoying.2C_useless_comment_now.3F]]
             currentPageText = page.text.Replace(" <!-- Metadata: see [[Wikipedia:Persondata]]. -->", "");
             origPageText = page.text;
             textBoxTitle.Text = page.title;
-            textBoxWikitext.Text = currentPageText.Replace("\n", "\r\n");
+            textBoxWikitext.Text = Regex.Replace(currentPageText, @"(?!=\r)\n", "\r\n");
 
             if (tabControlPage.SelectedTab == tabPageBrowser)
             {
                 NavigateWebBrowserToCurrentPage();
             }
 
-            Match templateMatch = regexTemplate.Match(currentPageText);
-            currentTemplate = regexTemplate.Match(currentPageText).Value;
+            // Fill in the textboxes with values from the existing template
+            Match templateMatch = regexPersondataTemplate.Match(currentPageText);
+            currentTemplate = regexPersondataTemplate.Match(currentPageText).Value;
             currentTemplateIndex = templateMatch.Index;
-            textBoxName.Text = regexName.Match(currentTemplate).Groups[1].Value.Trim();
-            origName = textBoxName.Text;
-            textBoxAlternativeNames.Text = regexAlternativeNames.Match(currentTemplate).Groups[1].Value.Trim();
-            origAlternativeNames = textBoxAlternativeNames.Text;
-            textBoxShortDescription.Text = regexShortDescription.Match(currentTemplate).Groups[1].Value.Trim();
-            origShortDescription = textBoxShortDescription.Text;
-            textBoxDateOfBirth.Text = regexDateOfBirth.Match(currentTemplate).Groups[1].Value.Trim();
-            origDateOfBirth = textBoxDateOfBirth.Text;
-            textBoxPlaceOfBirth.Text = regexPlaceOfBirth.Match(currentTemplate).Groups[1].Value.Trim();
-            origPlaceOfBirth = textBoxPlaceOfBirth.Text;
-            textBoxDateOfDeath.Text = regexDateOfDeath.Match(currentTemplate).Groups[1].Value.Trim();
-            origDateOfDeath = textBoxDateOfDeath.Text;
-            textBoxPlaceOfDeath.Text = regexPlaceOfDeath.Match(currentTemplate).Groups[1].Value.Trim();
-            origPlaceOfDeath = textBoxPlaceOfDeath.Text;
 
-            if (textBoxName.Text == "")
-            {
-                textBoxName.Text = GuessName(page);
-            }
+            origName = regexName.Match(currentTemplate).Groups[1].Value.Trim(); // NOTE: set origXXX values before the textbox value, which would trigger recoloring, but it would screw up if origXXX wouldn't be set yet
+            textBoxName.Text = origName;
+            SetToolTipForFieldTextbox(textBoxName);
+
+            origAlternativeNames = regexAlternativeNames.Match(currentTemplate).Groups[1].Value.Trim();
+            textBoxAlternativeNames.Text = origAlternativeNames;
+            SetToolTipForFieldTextbox(textBoxAlternativeNames);
+
+            origShortDescription = regexShortDescription.Match(currentTemplate).Groups[1].Value.Trim();
+            textBoxShortDescription.Text = origShortDescription;
+            SetToolTipForFieldTextbox(textBoxShortDescription);
+
+            origDateOfBirth = regexPersondataDateOfBirth.Match(currentTemplate).Groups[1].Value.Trim();
+            textBoxDateOfBirth.Text = origDateOfBirth;
+            SetToolTipForFieldTextbox(textBoxDateOfBirth);
+
+            origPlaceOfBirth = regexPlaceOfBirth.Match(currentTemplate).Groups[1].Value.Trim();
+            textBoxPlaceOfBirth.Text = origPlaceOfBirth;
+            SetToolTipForFieldTextbox(textBoxPlaceOfBirth);
+
+            origDateOfDeath = regexDateOfDeath.Match(currentTemplate).Groups[1].Value.Trim();
+            textBoxDateOfDeath.Text = origDateOfDeath;
+            SetToolTipForFieldTextbox(textBoxDateOfDeath);
+
+            origPlaceOfDeath = regexPlaceOfDeath.Match(currentTemplate).Groups[1].Value.Trim();
+            textBoxPlaceOfDeath.Text = origPlaceOfDeath;
+            SetToolTipForFieldTextbox(textBoxPlaceOfDeath);
+
+            // Time to guess values
+            if (textBoxName.Text == "") textBoxName.Text = GuessName(page);
+            textBoxDateOfBirth.Text = GuessDate(textBoxDateOfBirth.Text, GuessDateType.birth);
+            textBoxDateOfDeath.Text = GuessDate(textBoxDateOfDeath.Text, GuessDateType.death);
 
             manualEditSummary = false;
 
@@ -334,7 +355,7 @@ namespace Persondata_o_matic
 
             string warningText = "";
 
-            if (regexTemplate.Matches(currentPageText).Count > 1)
+            if (regexPersondataTemplate.Matches(currentPageText).Count > 1)
             {
                 warningText += "* Multiple {{persondata}} templates found!";
             }
@@ -350,6 +371,14 @@ namespace Persondata_o_matic
             }
 
             UpdateFocus();
+        }
+
+        /// <summary>
+        /// Add a tooltip for a given textbox based on its current value as formatted for field value textboxes
+        /// </summary>
+        private void SetToolTipForFieldTextbox(TextBox textBox)
+        {
+            toolTipForTextboxes.SetToolTip(textBox, textBox.Text != "" ? "Original value: " + "\"" + textBox.Text + "\"" : "No original value");
         }
 
         private void NavigateWebBrowserToCurrentPage()
@@ -384,6 +413,134 @@ namespace Persondata_o_matic
                 }
             }
             return "";
+        }
+
+        private const string monthNames = @"(Jan(?:uary)?|Feb(?:ruary)?|Mar(c?:h)?|Apr(?:il)?|May|Jun[ey]?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:embr)?|Dec(?:ember)?)";
+
+        private enum GuessDateType { birth, death }
+        private const string birthDateTemplates = @"(?:Birth date|Birth year|Birthdate|Date of birth|Dob|Birth date and age|BDA|Birthdate and age|Birthdateandage)\s*\|\s*";
+        private const string deathDateTemplates = @"(?:Death date|Date of death|Date of disappearance with age|Dda|Deathdateandage|Event date and age)\s*\|\s*";
+
+        private string GuessDate(string currentValue, GuessDateType guessDateType)
+        {
+            // First, let's see if we can recognise the existing date
+            // Basically, we'd want to fill in more info if possible in case the original data is lacking, 
+            // so we don't skip the field right away if it is non-empty
+
+            // This variable will signify how complex the existing value is:
+            // > 0 -- no value
+            // > 1 -- just 1 data point: year
+            // > 2 -- just 2 data points: year and month
+            // > 3 -- 3 data points: year, month, day
+            // > 4 -- could not parse the value, so shouldn't mess with this
+            // This implies if we discover day, month, year, but the current value is just year, we can update it
+            // Real example: http://en.wikipedia.org/w/index.php?title=Fuad_Abdurahmanov&diff=prev&oldid=480996103
+            int currentComplexity = 0;
+
+            string currentValueTrimmed = currentValue.Trim();
+
+            if (currentValueTrimmed != "")
+            {
+                currentComplexity = 4; // by default, we cannot parse it
+
+                // YEAR
+                if (Regex.Match(currentValueTrimmed, @"^(\[\[)?[0-9]{4}(\]\])?$").Success)
+                    currentComplexity = 1;
+
+                // MONTH YEAR
+                else if (Regex.Match(currentValueTrimmed, @"^" + monthNames + @"\s*[0-9]{4}$", RegexOptions.IgnoreCase).Success)
+                    currentComplexity = 2;
+
+                // DAY MONTH YEAR
+                else if (Regex.Match(currentValueTrimmed, @"^[0-9]{2}(?:th|nd|rd)?\s*" + monthNames + @"\s*[0-9]{4}$", RegexOptions.IgnoreCase).Success)
+                    currentComplexity = 3;
+
+                // MONTH DAY YEAR
+                else if (Regex.Match(currentValueTrimmed, @"^" + monthNames + @"^[0-9]{2}(?:th|nd|rd)?,?\s*[0-9]{4}$", RegexOptions.IgnoreCase).Success)
+                    currentComplexity = 3;
+
+                // DAY MONTH YEAR (probably)
+                else if (Regex.Match(currentValueTrimmed, @"^[0-9]{2}[\s\-\.]*[0-9]{2}[\s\-\.]*[0-9]{4}$", RegexOptions.IgnoreCase).Success)
+                    currentComplexity = 3;
+
+                // YEAR MONTH DAY
+                else if (Regex.Match(currentValueTrimmed, @"^[0-9]{4}[\s\-\.]*[0-9]{2}[\s\-\.]*[0-9]{2}$", RegexOptions.IgnoreCase).Success)
+                    currentComplexity = 3;
+            }
+
+            // We will skip guessing if we already have 3 data points (day, month, year) because we cannot guess anything more accurate anyway
+            // Potentially, we can verify that our guess is the same as the value and alert the user if it isn't
+            if (currentComplexity >= 3)
+                return currentValue;
+
+            Match infoboxMatch = regexInfoboxTemplate.Match(currentPageText);
+            if (infoboxMatch.Success)
+            {
+                string infoboxText = infoboxMatch.Value;
+
+                Match fieldMatch = guessDateType == GuessDateType.birth ? regexInfoboxDateOfBirth.Match(infoboxText) : regexInfoboxDateOfDeath.Match(infoboxText);
+                if (fieldMatch.Success)
+                {
+                    // Get the value of the field
+                    string value = fieldMatch.Groups[1].Value.Trim();
+                    if (value == "") return currentValue;
+
+                    // Trim any comments from the field
+                    value = Regex.Replace(value, "<!--.*?-->", "").Trim();
+                    if (value == "") return currentValue;
+
+                    if (currentComplexity < 3) // if current value is less than day+month+year
+                    {
+                        // Try to find birth date template
+                        // {{Birth date|1993|2|24|df=yes}} returns "24 February 1993"
+                        // {{Birth date|1993|2|24|mf=yes}} returns "February 24, 1993"
+                        Match match = Regex.Match(
+                            value,
+                            @"\{\{\s*" +
+                            (guessDateType == GuessDateType.birth ? birthDateTemplates : deathDateTemplates) +
+                            @"([0-9]+)\s*\|\s*([0-9]+)\s*\|\s*([0-9]+)\s*\|?(?:\s*([md])f\s*=\s*yes)?", // don't care about the ending
+                            RegexOptions.IgnoreCase
+                            );
+                        if (match.Success)
+                        {
+                            if (match.Groups[4].Value == "m")
+                                return match.Groups[1] + " " + MonthName(int.Parse(match.Groups[2].Value)) + " " + match.Groups[3];
+                            else
+                                return MonthName(int.Parse(match.Groups[2].Value)) + " " + match.Groups[1] + ", " + match.Groups[3];
+                        }
+                    }
+
+                    // Birth-date death-date -- plain text
+                    // {{start-date|7 December 1941}}
+                    // {{start-date|5:43PM HST, December 7th, 1941|tz=y}}
+                    // {{start-date| December 8, 1941 12:50PM Australia/Adelaide|tz=y}}
+
+                    if (currentComplexity == 0) // if there was no value before
+                        return value; // try the field without any parsing, user can fix it up
+                }
+            }
+
+            return currentValue;
+        }
+
+        private string MonthName(int monthNumber)
+        {
+            switch (monthNumber)
+            {
+                case 01: return "January";
+                case 02: return "February";
+                case 03: return "March";
+                case 04: return "April";
+                case 05: return "May";
+                case 06: return "June";
+                case 07: return "July";
+                case 08: return "August";
+                case 09: return "September";
+                case 10: return "October";
+                case 11: return "November";
+                case 12: return "December";
+                default: return monthNumber < 10 ? "0" + monthNumber : monthNumber.ToString();
+            }
         }
 
         private void UpdateFocus()
@@ -492,6 +649,23 @@ namespace Persondata_o_matic
 
         private delegate string UpdateEditSummaryHelper(string name, string origValue, string value);
 
+        private string UpdateEditSummaryHelperExtraLong(string name, string origValue, string value)
+        {
+            if (origValue.Trim() == "" && value.Trim() != "")
+            {
+                return "added " + name + " \"" + value.Trim() + "\"";
+            }
+            else if (origValue.Trim() != "" && value.Trim() == "")
+            {
+                return "removed " + name + " (was \"" + origValue.Trim() + "\")";
+            }
+            else if (origValue.Trim() != value.Trim() && origValue.Trim() != "" && value.Trim() != "")
+            {
+                return "updated " + name + " from \"" + origValue.Trim() + "\" to \"" + value.Trim() + "\"";
+            }
+            return "";
+        }
+
         private string UpdateEditSummaryHelperLong(string name, string origValue, string value)
         {
             if (origValue.Trim() == "" && value.Trim() != "")
@@ -545,8 +719,10 @@ namespace Persondata_o_matic
                 return;
             }
 
+            List<string> listExtraLong = new List<string>();
             List<string> listLong = new List<string>();
             List<string> listShort = new List<string>();
+            CreateSummaryList(UpdateEditSummaryHelperExtraLong, listExtraLong);
             CreateSummaryList(UpdateEditSummaryHelperLong, listLong);
             CreateSummaryList(UpdateEditSummaryHelperShort, listShort);
 
@@ -556,17 +732,16 @@ namespace Persondata_o_matic
             }
             else
             {
-                textBoxEditSummary.Text = "Persondata: " + string.Join(", ", listLong.ToArray()) + " using [[WP:POM|Persondata-o-matic]]";
+                textBoxEditSummary.Text = "Persondata: " + string.Join(", ", listExtraLong.ToArray()) + " using [[WP:POM|Persondata-o-matic]]";
 
                 if (textBoxEditSummary.Text.Length > 250)
-                {
+                    textBoxEditSummary.Text = "Persondata: " + string.Join(", ", listLong.ToArray()) + " using [[WP:POM|Persondata-o-matic]]";
+
+                if (textBoxEditSummary.Text.Length > 250)
                     textBoxEditSummary.Text = "Persondata: " + string.Join(", ", listShort.ToArray()) + " using [[WP:POM|Persondata-o-matic]]";
-                }
 
                 if (textBoxEditSummary.Text.Length > 250)
-                {
                     textBoxEditSummary.Text = "Modifying Persondata using [[WP:POM|Persondata-o-matic]]";
-                }
             }
             manualEditSummary = false;
         }
@@ -605,36 +780,43 @@ namespace Persondata_o_matic
         private void textBoxName_TextChanged(object sender, EventArgs e)
         {
             UpdateField(textBoxName.Text, regexName);
+            textBoxName.BackColor = ColorFromChange(origName, textBoxName.Text);
         }
 
         private void textBoxAlternativeNames_TextChanged(object sender, EventArgs e)
         {
             UpdateField(textBoxAlternativeNames.Text, regexAlternativeNames);
+            textBoxAlternativeNames.BackColor = ColorFromChange(origAlternativeNames, textBoxAlternativeNames.Text);
         }
 
         private void textBoxShortDescription_TextChanged(object sender, EventArgs e)
         {
             UpdateField(textBoxShortDescription.Text, regexShortDescription);
+            textBoxShortDescription.BackColor = ColorFromChange(origShortDescription, textBoxShortDescription.Text);
         }
 
         private void textBoxDateOfBirth_TextChanged(object sender, EventArgs e)
         {
-            UpdateField(textBoxDateOfBirth.Text, regexDateOfBirth);
+            UpdateField(textBoxDateOfBirth.Text, regexPersondataDateOfBirth);
+            textBoxDateOfBirth.BackColor = ColorFromChange(origDateOfBirth, textBoxDateOfBirth.Text);
         }
 
         private void textBoxPlaceOfBirth_TextChanged(object sender, EventArgs e)
         {
             UpdateField(textBoxPlaceOfBirth.Text, regexPlaceOfBirth);
+            textBoxPlaceOfBirth.BackColor = ColorFromChange(origPlaceOfBirth, textBoxPlaceOfBirth.Text);
         }
 
         private void textBoxDateOfDeath_TextChanged(object sender, EventArgs e)
         {
             UpdateField(textBoxDateOfDeath.Text, regexDateOfDeath);
+            textBoxDateOfDeath.BackColor = ColorFromChange(origDateOfDeath, textBoxDateOfDeath.Text);
         }
 
         private void textBoxPlaceOfDeath_TextChanged(object sender, EventArgs e)
         {
             UpdateField(textBoxPlaceOfDeath.Text, regexPlaceOfDeath);
+            textBoxPlaceOfDeath.BackColor = ColorFromChange(origPlaceOfDeath, textBoxPlaceOfDeath.Text);
         }
 
         private void textBoxEditSummary_TextChanged(object sender, EventArgs e)
@@ -642,9 +824,30 @@ namespace Persondata_o_matic
             manualEditSummary = true;
         }
 
+        /// <summary>
+        /// This will return a background color for a textbox based on what the original value was and what the new value is
+        /// </summary>
+        private Color ColorFromChange(string original, string current)
+        {
+            // No change
+            if (original == current) return Color.White;
+
+            // We removed the field
+            if (original != "" && current == "") return Color.Tomato;
+
+            // We added the field
+            if (original == "" && current != "") return Color.Cyan;
+
+            // We modified the field
+            if (original != "" && current != "") return Color.Gold;
+
+            return Color.HotPink; // becuse we are awesome and this should never happen
+        }
+
         private void FormMain_Shown(object sender, EventArgs e)
         {
             UpdateFocus();
+            tabControlPage.SelectTab(tabPageMarkup);
         }
 
         private void buttonSkip_Click(object sender, EventArgs e)
@@ -690,7 +893,7 @@ namespace Persondata_o_matic
                 {
                     lastSavedPageIndex++;
                 }
-                currentPageText = regexTemplate.Replace(currentPageText, "");
+                currentPageText = regexPersondataTemplate.Replace(currentPageText, "");
                 if (currentPageText != origPageText)
                 {
                     pageList[lastSavedPageIndex].text = currentPageText;
@@ -729,6 +932,17 @@ namespace Persondata_o_matic
             {
                 NavigateWebBrowserToCurrentPage();
             }
+        }
+
+        private void restoreValueButton_Click(object sender, EventArgs e)
+        {
+            textBoxName.Text = origName;
+            textBoxAlternativeNames.Text = origAlternativeNames;
+            textBoxShortDescription.Text = origShortDescription;
+            textBoxDateOfBirth.Text = origDateOfBirth;
+            textBoxPlaceOfBirth.Text = origPlaceOfBirth;
+            textBoxDateOfDeath.Text = origDateOfDeath;
+            textBoxPlaceOfDeath.Text = origPlaceOfDeath;
         }
     }
 

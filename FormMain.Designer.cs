@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.labelName = new System.Windows.Forms.Label();
             this.labelAlternativeNames = new System.Windows.Forms.Label();
@@ -44,6 +45,7 @@
             this.textBoxDateOfDeath = new System.Windows.Forms.TextBox();
             this.textBoxPlaceOfDeath = new System.Windows.Forms.TextBox();
             this.panelPersondata = new System.Windows.Forms.Panel();
+            this.restoreValuesButton = new System.Windows.Forms.Button();
             this.labelWarnings = new System.Windows.Forms.Label();
             this.buttonRemove = new System.Windows.Forms.Button();
             this.textBoxEditSummary = new System.Windows.Forms.TextBox();
@@ -54,12 +56,16 @@
             this.textBoxTitle = new System.Windows.Forms.TextBox();
             this.buttonOpenInBrowser = new System.Windows.Forms.Button();
             this.tabControlPage = new System.Windows.Forms.TabControl();
+            this.tabPageOriginal = new System.Windows.Forms.TabPage();
+            this.textBoxWikitextOriginal = new System.Windows.Forms.TextBox();
             this.tabPageMarkup = new System.Windows.Forms.TabPage();
             this.textBoxWikitext = new System.Windows.Forms.TextBox();
             this.tabPageBrowser = new System.Windows.Forms.TabPage();
             this.webBrowser = new System.Windows.Forms.WebBrowser();
+            this.toolTipForTextboxes = new System.Windows.Forms.ToolTip(this.components);
             this.panelPersondata.SuspendLayout();
             this.tabControlPage.SuspendLayout();
+            this.tabPageOriginal.SuspendLayout();
             this.tabPageMarkup.SuspendLayout();
             this.tabPageBrowser.SuspendLayout();
             this.SuspendLayout();
@@ -185,6 +191,7 @@
             // 
             // panelPersondata
             // 
+            this.panelPersondata.Controls.Add(this.restoreValuesButton);
             this.panelPersondata.Controls.Add(this.labelWarnings);
             this.panelPersondata.Controls.Add(this.buttonRemove);
             this.panelPersondata.Controls.Add(this.textBoxEditSummary);
@@ -211,11 +218,23 @@
             this.panelPersondata.Size = new System.Drawing.Size(395, 584);
             this.panelPersondata.TabIndex = 15;
             // 
+            // restoreValuesButton
+            // 
+            this.restoreValuesButton.Location = new System.Drawing.Point(294, 167);
+            this.restoreValuesButton.Name = "restoreValuesButton";
+            this.restoreValuesButton.Size = new System.Drawing.Size(98, 23);
+            this.restoreValuesButton.TabIndex = 25;
+            this.restoreValuesButton.Text = "Reset values";
+            this.toolTipForTextboxes.SetToolTip(this.restoreValuesButton, "This will restore the original value as in the article and remove any modificatio" +
+                    "ns and guesses");
+            this.restoreValuesButton.UseVisualStyleBackColor = true;
+            this.restoreValuesButton.Click += new System.EventHandler(this.restoreValueButton_Click);
+            // 
             // labelWarnings
             // 
             this.labelWarnings.AutoSize = true;
             this.labelWarnings.ForeColor = System.Drawing.Color.Red;
-            this.labelWarnings.Location = new System.Drawing.Point(10, 252);
+            this.labelWarnings.Location = new System.Drawing.Point(10, 284);
             this.labelWarnings.Name = "labelWarnings";
             this.labelWarnings.Size = new System.Drawing.Size(91, 13);
             this.labelWarnings.TabIndex = 24;
@@ -224,7 +243,7 @@
             // 
             // buttonRemove
             // 
-            this.buttonRemove.Location = new System.Drawing.Point(204, 200);
+            this.buttonRemove.Location = new System.Drawing.Point(204, 232);
             this.buttonRemove.Name = "buttonRemove";
             this.buttonRemove.Size = new System.Drawing.Size(91, 23);
             this.buttonRemove.TabIndex = 23;
@@ -234,7 +253,7 @@
             // 
             // textBoxEditSummary
             // 
-            this.textBoxEditSummary.Location = new System.Drawing.Point(125, 171);
+            this.textBoxEditSummary.Location = new System.Drawing.Point(125, 203);
             this.textBoxEditSummary.Name = "textBoxEditSummary";
             this.textBoxEditSummary.Size = new System.Drawing.Size(267, 20);
             this.textBoxEditSummary.TabIndex = 20;
@@ -243,7 +262,7 @@
             // labelEditSummary
             // 
             this.labelEditSummary.AutoSize = true;
-            this.labelEditSummary.Location = new System.Drawing.Point(7, 174);
+            this.labelEditSummary.Location = new System.Drawing.Point(7, 206);
             this.labelEditSummary.Name = "labelEditSummary";
             this.labelEditSummary.Size = new System.Drawing.Size(72, 13);
             this.labelEditSummary.TabIndex = 19;
@@ -251,7 +270,7 @@
             // 
             // buttonSkip
             // 
-            this.buttonSkip.Location = new System.Drawing.Point(107, 200);
+            this.buttonSkip.Location = new System.Drawing.Point(107, 232);
             this.buttonSkip.Name = "buttonSkip";
             this.buttonSkip.Size = new System.Drawing.Size(91, 23);
             this.buttonSkip.TabIndex = 22;
@@ -261,7 +280,7 @@
             // 
             // buttonSaveAndNext
             // 
-            this.buttonSaveAndNext.Location = new System.Drawing.Point(10, 200);
+            this.buttonSaveAndNext.Location = new System.Drawing.Point(10, 232);
             this.buttonSaveAndNext.Name = "buttonSaveAndNext";
             this.buttonSaveAndNext.Size = new System.Drawing.Size(91, 23);
             this.buttonSaveAndNext.TabIndex = 21;
@@ -299,6 +318,7 @@
             // tabControlPage
             // 
             this.tabControlPage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.tabControlPage.Controls.Add(this.tabPageOriginal);
             this.tabControlPage.Controls.Add(this.tabPageMarkup);
             this.tabControlPage.Controls.Add(this.tabPageBrowser);
             this.tabControlPage.Location = new System.Drawing.Point(2, 33);
@@ -308,6 +328,28 @@
             this.tabControlPage.TabIndex = 3;
             this.tabControlPage.SelectedIndexChanged += new System.EventHandler(this.tabControlPage_SelectedIndexChanged);
             // 
+            // tabPageOriginal
+            // 
+            this.tabPageOriginal.Controls.Add(this.textBoxWikitextOriginal);
+            this.tabPageOriginal.Location = new System.Drawing.Point(4, 22);
+            this.tabPageOriginal.Name = "tabPageOriginal";
+            this.tabPageOriginal.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageOriginal.Size = new System.Drawing.Size(594, 525);
+            this.tabPageOriginal.TabIndex = 2;
+            this.tabPageOriginal.Text = "Original markup";
+            this.tabPageOriginal.UseVisualStyleBackColor = true;
+            // 
+            // textBoxWikitextOriginal
+            // 
+            this.textBoxWikitextOriginal.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxWikitextOriginal.Location = new System.Drawing.Point(3, 3);
+            this.textBoxWikitextOriginal.Multiline = true;
+            this.textBoxWikitextOriginal.Name = "textBoxWikitextOriginal";
+            this.textBoxWikitextOriginal.ReadOnly = true;
+            this.textBoxWikitextOriginal.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBoxWikitextOriginal.Size = new System.Drawing.Size(588, 519);
+            this.textBoxWikitextOriginal.TabIndex = 5;
+            // 
             // tabPageMarkup
             // 
             this.tabPageMarkup.Controls.Add(this.textBoxWikitext);
@@ -316,7 +358,7 @@
             this.tabPageMarkup.Padding = new System.Windows.Forms.Padding(3);
             this.tabPageMarkup.Size = new System.Drawing.Size(594, 525);
             this.tabPageMarkup.TabIndex = 0;
-            this.tabPageMarkup.Text = "Markup";
+            this.tabPageMarkup.Text = "Modified markup";
             this.tabPageMarkup.UseVisualStyleBackColor = true;
             // 
             // textBoxWikitext
@@ -350,6 +392,13 @@
             this.webBrowser.Size = new System.Drawing.Size(588, 519);
             this.webBrowser.TabIndex = 17;
             // 
+            // toolTipForTextboxes
+            // 
+            this.toolTipForTextboxes.AutomaticDelay = 50;
+            this.toolTipForTextboxes.AutoPopDelay = 50000;
+            this.toolTipForTextboxes.InitialDelay = 50;
+            this.toolTipForTextboxes.ReshowDelay = 10;
+            // 
             // FormMain
             // 
             this.AcceptButton = this.buttonSaveAndNext;
@@ -371,6 +420,8 @@
             this.panelPersondata.ResumeLayout(false);
             this.panelPersondata.PerformLayout();
             this.tabControlPage.ResumeLayout(false);
+            this.tabPageOriginal.ResumeLayout(false);
+            this.tabPageOriginal.PerformLayout();
             this.tabPageMarkup.ResumeLayout(false);
             this.tabPageMarkup.PerformLayout();
             this.tabPageBrowser.ResumeLayout(false);
@@ -410,6 +461,10 @@
         private System.Windows.Forms.TabPage tabPageBrowser;
         private System.Windows.Forms.WebBrowser webBrowser;
         private System.Windows.Forms.Label labelWarnings;
+        private System.Windows.Forms.TabPage tabPageOriginal;
+        private System.Windows.Forms.TextBox textBoxWikitextOriginal;
+        private System.Windows.Forms.ToolTip toolTipForTextboxes;
+        private System.Windows.Forms.Button restoreValuesButton;
     }
 }
 
