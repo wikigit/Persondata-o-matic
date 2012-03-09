@@ -771,7 +771,7 @@ namespace Persondata_o_matic
 
 
             int savePos = TextBoxHelpers.GetVScrollPos(textBoxWikitext);
-            textBoxWikitext.Text = currentPageText.Replace("\n", "\r\n");
+            textBoxWikitext.Text = Regex.Replace(currentPageText, @"(?!=\r)\n", "\r\n");
             TextBoxHelpers.SetVScrollPos(textBoxWikitext, savePos);
 
             UpdateEditSummary();
